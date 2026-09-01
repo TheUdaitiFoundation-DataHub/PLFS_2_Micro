@@ -147,22 +147,96 @@ select#state-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0
   .indicator-card.is-num .state-val,.indicator-card.is-num .india-val{width:98px;}
 }
 
+/* ============================================================
+   PHONE LAYOUT — everything above this point (desktop/tablet)
+   is untouched. Below 600px we switch each card to a stacked
+   layout (label on top, values in a flexible row underneath)
+   instead of forcing fixed pixel-width columns, so nothing
+   overflows and every value gets a consistent, legible size
+   regardless of how many digits it has.
+   ============================================================ */
 @media (max-width:600px){
-  .header{padding:12px 16px;}
-  .header-title{font-size:18px;}
+  .header{padding:10px 14px;gap:10px;}
+  .header-logo{height:38px;}
+  .header-title{font-size:16px;}
   .header-desc{display:none;}
-  .page-wrap{padding:22px 14px 50px;}
-  .indicator-card{padding:11px 12px;flex-wrap:wrap;}
-  .indicator-label{font-size:13px;}
-  .ind-value{font-size:15px;}
-  .indicator-card.sub-card{margin-left:10px;padding:9px 11px;}
-  .compare-head{padding:0 12px 6px;}
-  .chv-state,.chv-india,.state-val,.india-val{width:62px;font-size:9.5px;}
-  .compare-head.chead-wide .chv-state,.compare-head.chead-wide .chv-india,
-  .indicator-card.is-num .state-val,.indicator-card.is-num .india-val{width:86px;}
-  .ind-divider,.chv-divider{margin:0 8px;}
-  .scope-title{font-size:17px;}
-  .group-header span{font-size:11px;}
+
+  .page-wrap{padding:18px 12px 44px;max-width:100%!important;}
+
+  .filter-card{padding:16px 18px;margin-bottom:18px;}
+
+  .scope-title{font-size:16px;}
+  .scope-section{margin-bottom:24px;}
+
+  .group-header{padding:9px 12px;margin-top:6px;}
+  .group-header span{font-size:10.5px;}
+
+  /* Stack every card: label on its own line, values in a row below */
+  .indicator-card,
+  .page-wrap.mode-india .indicator-card{
+    flex-direction:column;
+    align-items:stretch;
+    gap:6px;
+    padding:12px 14px;
+  }
+  .indicator-card.sub-card,
+  .page-wrap.mode-india .indicator-card.sub-card{
+    margin-left:10px;
+    padding:10px 12px;
+  }
+
+  .indicator-label,
+  .page-wrap.mode-india .indicator-label{
+    font-size:13.5px;
+    width:100%;
+  }
+  .indicator-card.sub-card .indicator-label,
+  .page-wrap.mode-india .indicator-card.sub-card .indicator-label{
+    font-size:12px;
+  }
+
+  /* Single-value (default India) rows: value sits left-aligned under the label */
+  .page-wrap.mode-india .ind-value{
+    font-size:17px;
+    width:100%;
+    text-align:left;
+  }
+  .page-wrap.mode-india .ind-value .unit{font-size:17px;}
+  .page-wrap.mode-india .indicator-card.is-num .ind-value{font-size:15px;}
+  .page-wrap.mode-india .indicator-card.sub-card .ind-value{font-size:14.5px;}
+  .page-wrap.mode-india .indicator-card.sub-card .ind-value .unit{font-size:14.5px;}
+
+  /* Two-value (state vs India) rows: flexible-width columns instead of fixed px,
+     so long numbers always fit regardless of screen width */
+  .ind-values{width:100%;justify-content:flex-start;gap:0;}
+  .state-val,.india-val{
+    width:auto;
+    flex:1 1 0;
+    min-width:0;
+    text-align:left;
+    font-size:15px;
+  }
+  .india-val{text-align:right;}
+  .indicator-card.is-num .state-val,
+  .indicator-card.is-num .india-val{
+    width:auto;
+    font-size:13px;
+  }
+  .ind-divider{margin:0 10px;}
+
+  /* Comparison header (state name / "India") above each group */
+  .compare-head{padding:0 2px 6px;align-items:flex-start;}
+  .compare-head-label{display:none;}
+  .compare-head-values{width:100%;justify-content:flex-start;flex:1;}
+  .chv-state,.chv-india,
+  .compare-head.chead-wide .chv-state,.compare-head.chead-wide .chv-india{
+    width:auto;
+    flex:1 1 0;
+    min-width:0;
+    font-size:9.5px;
+  }
+  .chv-india{text-align:right;}
+  .chv-divider{margin:0 10px;}
 }
 </style>
 </head>
