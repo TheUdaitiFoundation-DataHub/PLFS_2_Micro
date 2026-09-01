@@ -57,19 +57,42 @@ select#state-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0
 .scope-title{font-size:20px;font-weight:800;color:var(--text);}
 .scope-place{font-weight:600;color:var(--text2);}
 
-.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
-.compare-grid.single-col{grid-template-columns:1fr;}
-.compare-grid.single-col .compare-col-india{display:none;}
-.compare-grid.single-col .compare-col-title{display:none;}
-
-.compare-col-title{font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.04em;
-  text-transform:uppercase;padding:8px 4px;margin-bottom:2px;border-bottom:2px solid var(--border-strong);}
-.compare-col-state .compare-col-title{color:var(--accent-dark);}
-.compare-col-india .compare-col-title{color:var(--text2);}
-.scope-section.urban .compare-col-state .compare-col-title{color:var(--urban);}
-.scope-section.rural .compare-col-state .compare-col-title{color:var(--rural);}
-
 .indicators{display:flex;flex-direction:column;gap:8px;}
+
+/* Comparison header row (state name vs India) — shown only when a state/UT is selected.
+   Repeated once at the top of each scope, and again after every group-header, so the
+   reader never loses track of which column is which further down the list. */
+.compare-head{display:none;align-items:flex-end;justify-content:space-between;gap:10px;
+  padding:0 16px 6px;}
+.compare-head-label{flex:1;min-width:0;}
+.compare-head-values{display:flex;align-items:flex-end;flex-shrink:0;gap:0;}
+.chv-state,.chv-india{width:100px;flex-shrink:0;text-align:right;font-family:var(--mono);
+  font-size:10.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;line-height:1.25;}
+.compare-head.chead-wide .chv-state,.compare-head.chead-wide .chv-india{width:118px;}
+.chv-state{color:var(--accent-dark);}
+.chv-india{color:var(--text2);}
+.chv-divider{width:2px;margin:0 12px;visibility:hidden;}
+.scope-section.urban .chv-state{color:var(--urban);}
+.scope-section.rural .chv-state{color:var(--rural);}
+
+/* Paired value area inside each indicator card — widths match the header exactly above */
+.ind-values{display:flex;align-items:center;flex-shrink:0;gap:0;}
+.ind-divider{width:2px;align-self:stretch;background:var(--muted);border-radius:1px;
+  margin:0 12px;flex-shrink:0;}
+.state-val,.india-val{width:100px;flex-shrink:0;text-align:right;}
+.indicator-card.is-num .state-val,.indicator-card.is-num .india-val{width:118px;}
+.india-val{color:var(--text2);}
+
+/* Default India view: single value only, no comparison chrome — identical to the
+   original single-column layout */
+.page-wrap.mode-india .compare-head,
+.page-wrap.mode-india .ind-divider,
+.page-wrap.mode-india .india-val{display:none;}
+
+/* When comparing a state against India, narrow the page a touch so the value pair
+   sits closer to the label instead of stretching to the far edge */
+.page-wrap.mode-compare{max-width:860px;}
+.page-wrap.mode-compare .compare-head{display:flex;}
 
 .group-header{margin-top:8px;margin-bottom:2px;padding:11px 14px;background:var(--surface3);
   border-radius:8px;border-left:5px solid var(--border-strong);}
@@ -93,7 +116,7 @@ select#state-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0
   overflow-wrap:break-word;}
 .ind-value{font-family:var(--mono);font-size:17px;font-weight:700;color:var(--text);
   white-space:nowrap;font-variant-numeric:tabular-nums;flex-shrink:0;text-align:right;}
-.ind-value .unit{font-size:17px;font-weight:700;color:var(--text);margin-left:1px;}
+.ind-value .unit{font-size:17px;font-weight:700;color:inherit;margin-left:1px;}
 .ind-value.dash{color:var(--muted);font-size:15px;}
 .indicator-card.is-num .ind-value{font-size:15px;}
 
@@ -119,9 +142,9 @@ select#state-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0
 .foot-note .src{margin-top:8px;color:var(--muted);font-size:11px;}
 
 @media (max-width:760px){
-  .compare-grid{grid-template-columns:1fr;}
-  .compare-col-title{display:block !important;}
-  .compare-grid.single-col .compare-col-title{display:none !important;}
+  .chv-state,.chv-india,.state-val,.india-val{width:78px;}
+  .compare-head.chead-wide .chv-state,.compare-head.chead-wide .chv-india,
+  .indicator-card.is-num .state-val,.indicator-card.is-num .india-val{width:98px;}
 }
 
 @media (max-width:600px){
@@ -133,6 +156,11 @@ select#state-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0
   .indicator-label{font-size:13px;}
   .ind-value{font-size:15px;}
   .indicator-card.sub-card{margin-left:10px;padding:9px 11px;}
+  .compare-head{padding:0 12px 6px;}
+  .chv-state,.chv-india,.state-val,.india-val{width:62px;font-size:9.5px;}
+  .compare-head.chead-wide .chv-state,.compare-head.chead-wide .chv-india,
+  .indicator-card.is-num .state-val,.indicator-card.is-num .india-val{width:86px;}
+  .ind-divider,.chv-divider{margin:0 8px;}
   .scope-title{font-size:17px;}
   .group-header span{font-size:11px;}
 }
@@ -165,125 +193,136 @@ select#state-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0
       <span class="scope-dot" style="background:var(--accent);"></span>
       <span class="scope-title">Overall <span class="scope-place" id="scope-place-combined">India</span></span>
     </div>
-    <div class="compare-grid" id="grid-c">
-      <div class="compare-col compare-col-state">
-        <div class="compare-col-title" id="c-col-title-state">India</div>
-        <div class="indicators">
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Overall Workforce (Employed)</div>
-          <div class="ind-value" id="c-workforce">—</div>
-        </div>
-        <div class="group-header"><span>Labour Force Participation (Employed + Unemployed)</span></div>
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Total LFPR (Employed + Unemployed)</div>
-          <div class="ind-value" id="c-total_lfpr">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Overall LFPR</div>
-          <div class="ind-value" id="c-lfpr">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Male LFPR</div>
-          <div class="ind-value" id="c-lfpr_male">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Female LFPR</div>
-          <div class="ind-value" id="c-lfpr_female">—</div>
-        </div>
-        <div class="group-header"><span>% Employed by Status of Employment</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Self-Employed</div>
-          <div class="ind-value" id="c-self_employed">—</div>
-        </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Own Account Worker / Employer</div>
-          <div class="ind-value" id="c-own_account">—</div>
-        </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Helper in Household Enterprise</div>
-          <div class="ind-value" id="c-helper">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Regular Wage / Salary Employment</div>
-          <div class="ind-value" id="c-regular_wage">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Casual Employment</div>
-          <div class="ind-value" id="c-casual_labour">—</div>
-        </div>
-        <div class="group-header"><span>% Employed by Economic Activity</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Agriculture</div>
-          <div class="ind-value" id="c-agri">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Manufacturing</div>
-          <div class="ind-value" id="c-manuf">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Services</div>
-          <div class="ind-value" id="c-services">—</div>
-        </div>
+            <div class="indicators" id="grid-c">
+      <div class="compare-head chead-wide">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card is-num">
+        <div class="indicator-label">Overall Workforce (Employed)</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-workforce">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-workforce">—</span>
         </div>
       </div>
-      <div class="compare-col compare-col-india" id="col-india-c">
-        <div class="compare-col-title">All India</div>
-        <div class="indicators">
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Overall Workforce (Employed)</div>
-          <div class="ind-value" id="c-india-workforce">—</div>
+      <div class="group-header"><span>Labour Force Participation</span></div>
+      <div class="compare-head">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Overall LFPR</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-lfpr">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-lfpr">—</span>
         </div>
-        <div class="group-header"><span>Labour Force Participation (Employed + Unemployed)</span></div>
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Total LFPR (Employed + Unemployed)</div>
-          <div class="ind-value" id="c-india-total_lfpr">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Male LFPR</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-lfpr_male">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-lfpr_male">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Overall LFPR</div>
-          <div class="ind-value" id="c-india-lfpr">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Female LFPR</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-lfpr_female">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-lfpr_female">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Male LFPR</div>
-          <div class="ind-value" id="c-india-lfpr_male">—</div>
+      </div>
+      <div class="group-header"><span>% Employed by Status of Employment</span></div>
+      <div class="compare-head">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Self-Employed</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-self_employed">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-self_employed">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Female LFPR</div>
-          <div class="ind-value" id="c-india-lfpr_female">—</div>
+      </div>
+      <div class="indicator-card sub-card">
+        <div class="indicator-label">— Own Account Worker / Employer</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-own_account">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-own_account">—</span>
         </div>
-        <div class="group-header"><span>% Employed by Status of Employment</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Self-Employed</div>
-          <div class="ind-value" id="c-india-self_employed">—</div>
+      </div>
+      <div class="indicator-card sub-card">
+        <div class="indicator-label">— Helper in Household Enterprise</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-helper">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-helper">—</span>
         </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Own Account Worker / Employer</div>
-          <div class="ind-value" id="c-india-own_account">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Regular Wage / Salary Employment</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-regular_wage">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-regular_wage">—</span>
         </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Helper in Household Enterprise</div>
-          <div class="ind-value" id="c-india-helper">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Casual Employment</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-casual_labour">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-casual_labour">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Regular Wage / Salary Employment</div>
-          <div class="ind-value" id="c-india-regular_wage">—</div>
+      </div>
+      <div class="group-header"><span>% Employed by Economic Activity</span></div>
+      <div class="compare-head">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Employed – Agriculture</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-agri">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-agri">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Casual Employment</div>
-          <div class="ind-value" id="c-india-casual_labour">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Employed – Manufacturing</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-manuf">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-manuf">—</span>
         </div>
-        <div class="group-header"><span>% Employed by Economic Activity</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Agriculture</div>
-          <div class="ind-value" id="c-india-agri">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Manufacturing</div>
-          <div class="ind-value" id="c-india-manuf">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Services</div>
-          <div class="ind-value" id="c-india-services">—</div>
-        </div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Employed – Services</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="c-services">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="c-india-services">—</span>
         </div>
       </div>
     </div>
@@ -294,125 +333,136 @@ select#state-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0
       <span class="scope-dot" style="background:var(--urban);"></span>
       <span class="scope-title">Urban <span class="scope-place" id="scope-place-urban">India</span></span>
     </div>
-    <div class="compare-grid" id="grid-u">
-      <div class="compare-col compare-col-state">
-        <div class="compare-col-title" id="u-col-title-state">India</div>
-        <div class="indicators">
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Overall Workforce (Employed)</div>
-          <div class="ind-value" id="u-workforce">—</div>
-        </div>
-        <div class="group-header"><span>Labour Force Participation (Employed + Unemployed)</span></div>
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Total LFPR (Employed + Unemployed)</div>
-          <div class="ind-value" id="u-total_lfpr">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Overall LFPR</div>
-          <div class="ind-value" id="u-lfpr">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Male LFPR</div>
-          <div class="ind-value" id="u-lfpr_male">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Female LFPR</div>
-          <div class="ind-value" id="u-lfpr_female">—</div>
-        </div>
-        <div class="group-header"><span>% Employed by Status of Employment</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Self-Employed</div>
-          <div class="ind-value" id="u-self_employed">—</div>
-        </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Own Account Worker / Employer</div>
-          <div class="ind-value" id="u-own_account">—</div>
-        </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Helper in Household Enterprise</div>
-          <div class="ind-value" id="u-helper">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Regular Wage / Salary Employment</div>
-          <div class="ind-value" id="u-regular_wage">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Casual Employment</div>
-          <div class="ind-value" id="u-casual_labour">—</div>
-        </div>
-        <div class="group-header"><span>% Employed by Economic Activity</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Agriculture</div>
-          <div class="ind-value" id="u-agri">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Manufacturing</div>
-          <div class="ind-value" id="u-manuf">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Services</div>
-          <div class="ind-value" id="u-services">—</div>
-        </div>
+            <div class="indicators" id="grid-u">
+      <div class="compare-head chead-wide">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card is-num">
+        <div class="indicator-label">Overall Workforce (Employed)</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-workforce">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-workforce">—</span>
         </div>
       </div>
-      <div class="compare-col compare-col-india" id="col-india-u">
-        <div class="compare-col-title">All India</div>
-        <div class="indicators">
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Overall Workforce (Employed)</div>
-          <div class="ind-value" id="u-india-workforce">—</div>
+      <div class="group-header"><span>Labour Force Participation</span></div>
+      <div class="compare-head">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Overall LFPR</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-lfpr">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-lfpr">—</span>
         </div>
-        <div class="group-header"><span>Labour Force Participation (Employed + Unemployed)</span></div>
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Total LFPR (Employed + Unemployed)</div>
-          <div class="ind-value" id="u-india-total_lfpr">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Male LFPR</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-lfpr_male">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-lfpr_male">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Overall LFPR</div>
-          <div class="ind-value" id="u-india-lfpr">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Female LFPR</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-lfpr_female">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-lfpr_female">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Male LFPR</div>
-          <div class="ind-value" id="u-india-lfpr_male">—</div>
+      </div>
+      <div class="group-header"><span>% Employed by Status of Employment</span></div>
+      <div class="compare-head">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Self-Employed</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-self_employed">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-self_employed">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Female LFPR</div>
-          <div class="ind-value" id="u-india-lfpr_female">—</div>
+      </div>
+      <div class="indicator-card sub-card">
+        <div class="indicator-label">— Own Account Worker / Employer</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-own_account">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-own_account">—</span>
         </div>
-        <div class="group-header"><span>% Employed by Status of Employment</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Self-Employed</div>
-          <div class="ind-value" id="u-india-self_employed">—</div>
+      </div>
+      <div class="indicator-card sub-card">
+        <div class="indicator-label">— Helper in Household Enterprise</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-helper">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-helper">—</span>
         </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Own Account Worker / Employer</div>
-          <div class="ind-value" id="u-india-own_account">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Regular Wage / Salary Employment</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-regular_wage">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-regular_wage">—</span>
         </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Helper in Household Enterprise</div>
-          <div class="ind-value" id="u-india-helper">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Casual Employment</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-casual_labour">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-casual_labour">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Regular Wage / Salary Employment</div>
-          <div class="ind-value" id="u-india-regular_wage">—</div>
+      </div>
+      <div class="group-header"><span>% Employed by Economic Activity</span></div>
+      <div class="compare-head">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Employed – Agriculture</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-agri">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-agri">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Casual Employment</div>
-          <div class="ind-value" id="u-india-casual_labour">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Employed – Manufacturing</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-manuf">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-manuf">—</span>
         </div>
-        <div class="group-header"><span>% Employed by Economic Activity</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Agriculture</div>
-          <div class="ind-value" id="u-india-agri">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Manufacturing</div>
-          <div class="ind-value" id="u-india-manuf">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Services</div>
-          <div class="ind-value" id="u-india-services">—</div>
-        </div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Employed – Services</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="u-services">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="u-india-services">—</span>
         </div>
       </div>
     </div>
@@ -423,132 +473,143 @@ select#state-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0
       <span class="scope-dot" style="background:var(--rural);"></span>
       <span class="scope-title">Rural <span class="scope-place" id="scope-place-rural">India</span></span>
     </div>
-    <div class="compare-grid" id="grid-r">
-      <div class="compare-col compare-col-state">
-        <div class="compare-col-title" id="r-col-title-state">India</div>
-        <div class="indicators">
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Overall Workforce (Employed)</div>
-          <div class="ind-value" id="r-workforce">—</div>
-        </div>
-        <div class="group-header"><span>Labour Force Participation (Employed + Unemployed)</span></div>
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Total LFPR (Employed + Unemployed)</div>
-          <div class="ind-value" id="r-total_lfpr">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Overall LFPR</div>
-          <div class="ind-value" id="r-lfpr">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Male LFPR</div>
-          <div class="ind-value" id="r-lfpr_male">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Female LFPR</div>
-          <div class="ind-value" id="r-lfpr_female">—</div>
-        </div>
-        <div class="group-header"><span>% Employed by Status of Employment</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Self-Employed</div>
-          <div class="ind-value" id="r-self_employed">—</div>
-        </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Own Account Worker / Employer</div>
-          <div class="ind-value" id="r-own_account">—</div>
-        </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Helper in Household Enterprise</div>
-          <div class="ind-value" id="r-helper">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Regular Wage / Salary Employment</div>
-          <div class="ind-value" id="r-regular_wage">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Casual Employment</div>
-          <div class="ind-value" id="r-casual_labour">—</div>
-        </div>
-        <div class="group-header"><span>% Employed by Economic Activity</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Agriculture</div>
-          <div class="ind-value" id="r-agri">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Manufacturing</div>
-          <div class="ind-value" id="r-manuf">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Services</div>
-          <div class="ind-value" id="r-services">—</div>
-        </div>
+            <div class="indicators" id="grid-r">
+      <div class="compare-head chead-wide">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card is-num">
+        <div class="indicator-label">Overall Workforce (Employed)</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-workforce">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-workforce">—</span>
         </div>
       </div>
-      <div class="compare-col compare-col-india" id="col-india-r">
-        <div class="compare-col-title">All India</div>
-        <div class="indicators">
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Overall Workforce (Employed)</div>
-          <div class="ind-value" id="r-india-workforce">—</div>
+      <div class="group-header"><span>Labour Force Participation</span></div>
+      <div class="compare-head">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Overall LFPR</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-lfpr">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-lfpr">—</span>
         </div>
-        <div class="group-header"><span>Labour Force Participation (Employed + Unemployed)</span></div>
-        <div class="indicator-card is-num">
-          <div class="indicator-label">Total LFPR (Employed + Unemployed)</div>
-          <div class="ind-value" id="r-india-total_lfpr">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Male LFPR</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-lfpr_male">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-lfpr_male">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Overall LFPR</div>
-          <div class="ind-value" id="r-india-lfpr">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Female LFPR</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-lfpr_female">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-lfpr_female">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Male LFPR</div>
-          <div class="ind-value" id="r-india-lfpr_male">—</div>
+      </div>
+      <div class="group-header"><span>% Employed by Status of Employment</span></div>
+      <div class="compare-head">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Self-Employed</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-self_employed">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-self_employed">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Female LFPR</div>
-          <div class="ind-value" id="r-india-lfpr_female">—</div>
+      </div>
+      <div class="indicator-card sub-card">
+        <div class="indicator-label">— Own Account Worker / Employer</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-own_account">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-own_account">—</span>
         </div>
-        <div class="group-header"><span>% Employed by Status of Employment</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Self-Employed</div>
-          <div class="ind-value" id="r-india-self_employed">—</div>
+      </div>
+      <div class="indicator-card sub-card">
+        <div class="indicator-label">— Helper in Household Enterprise</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-helper">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-helper">—</span>
         </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Own Account Worker / Employer</div>
-          <div class="ind-value" id="r-india-own_account">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Regular Wage / Salary Employment</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-regular_wage">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-regular_wage">—</span>
         </div>
-        <div class="indicator-card sub-card">
-          <div class="indicator-label">— Helper in Household Enterprise</div>
-          <div class="ind-value" id="r-india-helper">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Casual Employment</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-casual_labour">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-casual_labour">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Regular Wage / Salary Employment</div>
-          <div class="ind-value" id="r-india-regular_wage">—</div>
+      </div>
+      <div class="group-header"><span>% Employed by Economic Activity</span></div>
+      <div class="compare-head">
+        <span class="compare-head-label"></span>
+        <span class="compare-head-values">
+          <span class="chv-state">India</span>
+          <span class="chv-divider"></span>
+          <span class="chv-india">India</span>
+        </span>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Employed – Agriculture</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-agri">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-agri">—</span>
         </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Casual Employment</div>
-          <div class="ind-value" id="r-india-casual_labour">—</div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Employed – Manufacturing</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-manuf">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-manuf">—</span>
         </div>
-        <div class="group-header"><span>% Employed by Economic Activity</span></div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Agriculture</div>
-          <div class="ind-value" id="r-india-agri">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Manufacturing</div>
-          <div class="ind-value" id="r-india-manuf">—</div>
-        </div>
-        <div class="indicator-card">
-          <div class="indicator-label">Employed – Services</div>
-          <div class="ind-value" id="r-india-services">—</div>
-        </div>
+      </div>
+      <div class="indicator-card">
+        <div class="indicator-label">Employed – Services</div>
+        <div class="ind-values">
+          <span class="ind-value state-val" id="r-services">—</span>
+          <span class="ind-divider"></span>
+          <span class="ind-value india-val" id="r-india-services">—</span>
         </div>
       </div>
     </div>
   </div>
 
   <div class="foot-note">
-    <b>Overall Workforce</b> and <b>Total LFPR</b> are absolute numbers of persons; all other indicators are percentages.
+    <b>Overall Workforce</b> is an absolute number of persons; all other indicators are percentages.
     Mining &amp; Quarrying and Construction are not reported here separately.
     <div class="src">Source: Periodic Labour Force Survey (PLFS) 2025.</div>
   </div>
@@ -582,7 +643,6 @@ function setValue(id, result){
 
 function fillCol(prefix, scopeData){
   setValue(prefix + '-workforce', fmtNum(scopeData.workforce));
-  setValue(prefix + '-total_lfpr', fmtNum(scopeData.total_lfpr));
   const pctKeys = ['lfpr','lfpr_male','lfpr_female','self_employed','own_account','helper',
                 'regular_wage','casual_labour','agri','manuf','services'];
   pctKeys.forEach(k => setValue(prefix + '-' + k, fmtPct(scopeData[k])));
@@ -599,14 +659,14 @@ function renderState(stateName){
   document.getElementById('scope-place-rural').textContent = placeLabel;
 
   const pageWrap = document.querySelector('.page-wrap');
-  if(isIndia) pageWrap.classList.add('mode-india');
-  else pageWrap.classList.remove('mode-india');
+  pageWrap.classList.toggle('mode-india', isIndia);
+  pageWrap.classList.toggle('mode-compare', !isIndia);
 
   ['c','u','r'].forEach(prefix => {
     const grid = document.getElementById('grid-' + prefix);
-    if(isIndia) grid.classList.add('single-col');
-    else grid.classList.remove('single-col');
-    document.getElementById(prefix + '-col-title-state').textContent = isIndia ? 'India' : d.state;
+    grid.querySelectorAll('.chv-state').forEach(el => {
+      el.textContent = isIndia ? 'India' : d.state;
+    });
   });
 
   fillCol('c', d.combined);
